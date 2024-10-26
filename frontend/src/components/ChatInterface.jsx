@@ -1,9 +1,11 @@
-import { useState } from 'react'
-import { Box, Input, Button, VStack } from '@chakra-ui/react'
+import { useState, useRef, useEffect } from 'react'
+import { Box, Input, Button, VStack, Flex, Icon } from '@chakra-ui/react'
+import { FiSend } from 'react-icons/fi'
 import MessageList from './MessageList'
 import axios from 'axios'
 
 function ChatInterface() {
+  const messagesEndRef = useRef(null)
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -12,6 +14,14 @@ function ChatInterface() {
   ])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -59,41 +69,81 @@ function ChatInterface() {
 
   return (
     <VStack 
-      spacing={4} 
+      spacing={0} 
       align="stretch" 
-      minH="100vh" 
-      p={4} 
-      bg="white" 
-      boxShadow="md" 
-      borderRadius="lg"
+      h="full" 
+      bg="gray.800"
+      boxShadow="dark-lg"
+      borderRadius="xl"
+      overflow="hidden"
     >
-  
-      <Box flex="1" overflowY="auto" border="1px solid" borderColor="gray.200" p={4}>
+      <Box 
+        flex="1" 
+        overflowY="auto" 
+        p={6}
+        bg="gray.800"
+        css={{
+          '&::-webkit-scrollbar': {
+            width: '4px',
+          },
+          '&::-webkit-scrollbar-track': {
+            width: '6px',
+            background: 'gray.800',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'gray.600',
+            borderRadius: '24px',
+          },
+        }}
+      >
         <MessageList messages={messages} />
+        <div ref={messagesEndRef} />
       </Box>
+      
       <Box 
         as="form" 
         onSubmit={handleSubmit} 
-        display="flex" 
-        gap={2}
         p={4}
+        bg="gray.750"
         borderTop="1px solid"
-        borderColor="gray.200"
+        borderColor="gray.700"
       >
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask a question..."
-          disabled={isLoading}
-        />
-        <Button
-          type="submit"
-          isLoading={isLoading}
-          loadingText="Thinking..."
-          colorScheme="blue"
-        >
-          Send
-        </Button>
+        <Flex gap={3}>
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type your message..."
+            size="lg"
+            bg="gray.700"
+            border="1px solid"
+            borderColor="gray.600"
+            color="white"
+            _hover={{
+              borderColor: 'gray.500'
+            }}
+            _focus={{
+              borderColor: 'blue.400',
+              boxShadow: 'none'
+            }}
+            _placeholder={{
+              color: 'gray.400'
+            }}
+            disabled={isLoading}
+          />
+          <Button
+            type="submit"
+            colorScheme="blue"
+            size="lg"
+            isLoading={isLoading}
+            loadingText="Sending"
+            px={8}
+            leftIcon={<Icon as={FiSend} />}
+            bg="blue.600"
+            _hover={{ bg: 'blue.500' }}
+          >
+            Send
+          </Button>
+        </Flex>
       </Box>
     </VStack>
   )
