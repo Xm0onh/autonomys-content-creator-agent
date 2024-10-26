@@ -75,75 +75,125 @@ function ChatInterface() {
     <VStack 
       spacing={0} 
       align="stretch" 
-      h="full" 
+      h="100%"  // Changed from "full" to "100%"
       bg="gray.800"
-      boxShadow="dark-lg"
-      borderRadius="xl"
+      boxShadow="2xl"
+      borderRadius="2xl"
+      border="1px solid"
+      borderColor="gray.700"
+      position="relative"
       overflow="hidden"
     >
       <Box 
         flex="1" 
-        overflowY="auto" 
-        p={6}
+        overflowY="auto"  // Added this
+        position="relative"  // Added this
+        p={5}
         bg="gray.800"
         css={{
           '&::-webkit-scrollbar': {
-            width: '4px',
+            width: '2px',
+            height: '2px',
           },
           '&::-webkit-scrollbar-track': {
-            width: '6px',
-            background: 'gray.800',
+            background: 'transparent',
           },
           '&::-webkit-scrollbar-thumb': {
-            background: 'gray.600',
-            borderRadius: '24px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '1px',
+            border: '2px solid transparent',
+            backgroundClip: 'padding-box',
+            '&:hover': {
+              background: 'rgba(255, 255, 255, 0.2)',
+            }
           },
+          // For Firefox
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent',
         }}
       >
-        <MessageList messages={messages} />
-        <div ref={messagesEndRef} />
+        <Box 
+          position="absolute"  // Added this
+          inset={0}  // Added this
+          p={5}  // Added this
+          overflowY="auto"  // Added this
+          sx={{
+            '& > *': {  // Apply styles to direct children
+              maxWidth: '100%',
+              wordBreak: 'break-word',  // Break long words
+              overflowWrap: 'break-word',  // Wrap long words
+              whiteSpace: 'pre-wrap'  // Preserve whitespace and wrap text
+            },
+            '& pre': {
+              maxWidth: '100%',
+              overflowX: 'hidden',  // Ensure no horizontal scroll for code blocks
+              overflowY: 'hidden'
+            }
+          }}
+        >
+          <MessageList messages={messages} />
+          <div ref={messagesEndRef} />
+        </Box>
       </Box>
       
       <Box 
         as="form" 
         onSubmit={handleSubmit} 
-        p={4}
-        bg="gray.750"
+        p={3}
+        w="full"
+        maxW="100%"
+        bg="gray.900"
         borderTop="1px solid"
         borderColor="gray.700"
+        backdropFilter="blur(8px)"
       >
-        <Flex gap={3}>
+        <Flex 
+          gap={2} 
+          w="full"
+          maxW="100%"
+        >
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message..."
-            size="lg"
-            bg="gray.700"
+            size="md"
+            flex="1"
+            minW={0}  // Important for flex items
+            bg="gray.800"
             border="1px solid"
             borderColor="gray.600"
             color="white"
             _hover={{
-              borderColor: 'gray.500'
+              borderColor: 'gray.500',
+              bg: 'gray.750'
             }}
             _focus={{
               borderColor: 'blue.400',
-              boxShadow: 'none'
+              bg: 'gray.750',
+              boxShadow: '0 0 0 1px var(--chakra-colors-blue-400)'
             }}
             _placeholder={{
               color: 'gray.400'
             }}
             disabled={isLoading}
+            transition="all 0.2s"
           />
           <Button
             type="submit"
             colorScheme="blue"
-            size="lg"
+            size="md"
             isLoading={isLoading}
             loadingText="Sending"
-            px={8}
+            px={4}
             leftIcon={<Icon as={FiSend} />}
-            bg="blue.600"
-            _hover={{ bg: 'blue.500' }}
+            bg="blue.500"
+            flexShrink={0}
+            _hover={{ 
+              bg: 'blue.400',
+              transform: 'translateY(-1px)'
+            }}
+            transition="all 0.2s"
+            shadow="md"
           >
             Send
           </Button>
