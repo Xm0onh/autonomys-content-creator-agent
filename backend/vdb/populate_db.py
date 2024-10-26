@@ -4,7 +4,7 @@ import shutil
 from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema.document import Document
-from embedding_function import get_embedding_function
+from langchain_ollama import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
 
 
@@ -104,6 +104,11 @@ def calculate_chunk_ids(chunks):
 def clear_database():
     if os.path.exists(CHROMA_PATH):
         shutil.rmtree(CHROMA_PATH)
+
+
+def get_embedding_function():
+    embeddings = OllamaEmbeddings(model="llama3") 
+    return embeddings
 
 
 if __name__ == "__main__":

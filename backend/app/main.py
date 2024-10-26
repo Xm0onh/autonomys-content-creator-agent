@@ -5,9 +5,10 @@ from langchain_ollama import OllamaLLM
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
-from embedding_function import get_embedding_function
+from utils.embedding import get_embedding_function
 
 CHROMA_PATH = "chroma"
+DATA_PATH = "data"
 
 PROMPT_TEMPLATE = """
 Answer the question based only on the following context:
