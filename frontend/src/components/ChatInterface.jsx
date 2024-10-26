@@ -3,6 +3,7 @@ import { Box, Input, Button, VStack, Flex, Icon } from '@chakra-ui/react'
 import { FiSend } from 'react-icons/fi'
 import MessageList from './MessageList'
 import axios from 'axios'
+import { useConfig } from '../context/ConfigContext'
 
 function ChatInterface() {
   const messagesEndRef = useRef(null)
@@ -14,6 +15,7 @@ function ChatInterface() {
   ])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const { config } = useConfig()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -38,9 +40,11 @@ function ChatInterface() {
     setIsLoading(true)
 
     try {
+      console.log(config)
       const response = await axios.get('http://localhost:8000/query', {
         params: {
-          query_text: input
+          query_text: input,
+          config: JSON.stringify(config)  // Send configuration with the request
         }
       })
       
