@@ -5,6 +5,7 @@ import json
 from pydantic import BaseModel
 
 from ...services.rag import query_rag
+from ...services.search import google_search, store_search_context
 
 router = APIRouter()
 
@@ -13,6 +14,12 @@ class QueryConfig(BaseModel):
     tone: str
     creativityLevel: int
     seoOptimization: bool
+
+class SearchRequest(BaseModel):
+    query: str
+
+class ChatContextRequest(BaseModel):
+    context: str
 
 @router.get("/query")
 async def query_endpoint(query_text: str, config: Optional[str] = None):
@@ -35,3 +42,27 @@ async def query_endpoint(query_text: str, config: Optional[str] = None):
 @router.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+@router.post("/search")
+async def search_endpoint(request: SearchRequest):
+    if not request.query.strip():
+        raise HTTPException(status_code=400, detail="Search query cannot be empty")
+    
+    try:
+        result = await google_search(request.query)
+        return JSONResponse(content={"result": result})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/chat/context")
+async def add_chat_context(request: ChatContextRequest):
+    if not request.context.strip():
+        raise HTTPException(status_code=400, detail="Context cannot be empty")
+    
+    try:
+        # Now store_search_context is properly imported
+        await store_search_context(request.context)
+        return JSONResponse(content={"status": "success"})
+    except Exception as e:
+        print(f"Error in add_chat_context: {str(e)}")  # Add logging
+        raise HTTPException(status_code=500, detail=str(e))
