@@ -3,9 +3,13 @@ from fastapi.responses import JSONResponse
 from typing import Optional
 import json
 from pydantic import BaseModel
-
+import os
+import aiohttp
+from fastapi import Header
+from ...core.config import settings
 from ...services.rag import query_rag
 from ...services.search import google_search, store_search_context
+from ...services.db_manager import update_database
 
 router = APIRouter()
 
@@ -65,4 +69,48 @@ async def add_chat_context(request: ChatContextRequest):
         return JSONResponse(content={"status": "success"})
     except Exception as e:
         print(f"Error in add_chat_context: {str(e)}")  # Add logging
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/retrieve/{cid}")
+async def retrieve_file(
+    cid: str,
+    authorization: str = Header(None)  # Remove decryption_key parameter
+):
+    try:
+        # Create data directory if it doesn't exist
+        os.makedirs(settings.DATA_PATH, exist_ok=True)
+        
+        # Download file from DSN
+        async with aiohttp.ClientSession() as session:
+            url = f"https://demo.auto-drive.autonomys.xyz/objects/{cid}/download"
+            headers = {
+                "Authorization": f"Bearer {settings.DSN_API_KEY}",
+                "x-auth-provider": "apikey"
+            }
+            
+            async with session.get(url, headers=headers) as response:
+                if response.status != 200:
+                    raise HTTPException(
+                        status_code=response.status,
+                        detail="Failed to download file from DSN"
+                    )
+                
+                # Get filename from headers or use CID as filename
+                content_disposition = response.headers.get("Content-Disposition", "")
+                filename = content_disposition.split("filename=")[-1].strip('"') or f"{cid}.pdf"
+                file_path = os.path.join(settings.DATA_PATH, filename)
+                
+                # Save file
+                with open(file_path, "wb") as f:
+                    f.write(await response.read())
+
+        # Update the database
+        await update_database()
+        
+        return {
+            "message": "File retrieved and database updated successfully",
+            "name": filename
+        }
+        
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -7,10 +7,6 @@ import os
 
 from ..core.config import settings
 
-# Add these to your config.py
-# GOOGLE_API_KEY: str = ""
-# GOOGLE_CSE_ID: str = ""
-
 search = GoogleSearchAPIWrapper(
     google_api_key=settings.GOOGLE_API_KEY,
     google_cse_id=settings.GOOGLE_CSE_ID,

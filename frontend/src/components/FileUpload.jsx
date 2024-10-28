@@ -7,8 +7,8 @@ function FileUpload() {
   const [files, setFiles] = useState([])
   const [isUploading, setIsUploading] = useState(false)
   const [cid, setCid] = useState('')
-  const [decryptionKey, setDecryptionKey] = useState('')
   const [retrievedFiles, setRetrievedFiles] = useState([])
+  const [isRetrieving, setIsRetrieving] = useState(false)
   const toast = useToast()
 
   const handleFileUpload = async (event) => {
@@ -50,10 +50,10 @@ function FileUpload() {
   }
 
   const handleRetrieve = async () => {
-    if (!cid || !decryptionKey) {
+    if (!cid) {
       toast({
-        title: 'Missing Fields',
-        description: 'Please provide both CID and decryption key',
+        title: 'Missing CID',
+        description: 'Please provide a CID',
         status: 'warning',
         duration: 3000,
         isClosable: true,
@@ -61,15 +61,13 @@ function FileUpload() {
       return
     }
 
+    setIsRetrieving(true)
     try {
-      const response = await axios.get(`http://localhost:8000/retrieve/${cid}`, {
-        params: { decryptionKey }
-      })
-      // Update to handle the retrieved file
-      setRetrievedFiles(prev => [...prev, response.data])
+      const response = await axios.get(`http://localhost:8000/retrieve/${cid}`)
+      setRetrievedFiles(prev => [...prev, { name: response.data.name }])
       toast({
         title: 'Retrieval Successful',
-        description: 'Your file has been retrieved.',
+        description: 'File retrieved and added to the database.',
         status: 'success',
         duration: 3000,
         isClosable: true,
@@ -78,11 +76,13 @@ function FileUpload() {
       console.error('Retrieval error:', error)
       toast({
         title: 'Retrieval Failed',
-        description: 'There was an error retrieving your file.',
+        description: error.response?.data?.detail || 'There was an error retrieving your file.',
         status: 'error',
         duration: 3000,
         isClosable: true,
       })
+    } finally {
+      setIsRetrieving(false)
     }
   }
 
@@ -188,19 +188,13 @@ function FileUpload() {
             color="gray.100"
             borderColor="gray.600"
           />
-          <Input
-            placeholder="Enter Decryption Key"
-            value={decryptionKey}
-            onChange={(e) => setDecryptionKey(e.target.value)}
-            bg="gray.800"
-            color="gray.100"
-            borderColor="gray.600"
-          />
           <Button
             colorScheme="green"
             width="full"
             onClick={handleRetrieve}
             leftIcon={<Icon as={FiDownload} />}
+            isLoading={isRetrieving}
+            loadingText="Retrieving..."
           >
             Retrieve File
           </Button>
