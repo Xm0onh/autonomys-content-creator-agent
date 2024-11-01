@@ -1,6 +1,7 @@
 from langchain_chroma import Chroma
 from langchain.prompts import ChatPromptTemplate
-from langchain_ollama import OllamaLLM
+from langchain_openai import ChatOpenAI
+# from langchain_ollama import OllamaLLM
 
 from ..core.config import settings
 from ..utils.embedding import get_embedding_function
@@ -60,12 +61,6 @@ def query_rag(query_text: str, config: dict = None) -> str:
     if config is None:
         config = {}
     
-    # Generate the system prompt based on configuration
-    system_prompt = generate_system_prompt(config)
-    
-    # Combine system prompt with user query
-    full_prompt = f"{system_prompt}\n\nUser Query: {query_text}\n\nResponse:"
-    print(full_prompt)
     try:
         # Prepare the DB.
         embedding_function = get_embedding_function()
@@ -78,13 +73,22 @@ def query_rag(query_text: str, config: dict = None) -> str:
         prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
         prompt = prompt_template.format(context=context_text, question=query_text)
 
-        model = OllamaLLM(model=settings.MODEL_NAME)
+
+        # Ollama
+        # llm = OllamaLLM(model=settings.MODEL_NAME)
+
+        # OpenAI
+        model = ChatOpenAI(
+            model="gpt-3.5-turbo",  # or "gpt-4" if you prefer
+            api_key=settings.OPENAI_API_KEY,
+            temperature=0.7
+        )
         response_text = model.invoke(prompt)
 
         sources = [doc.metadata.get("id", None) for doc, _score in results]
         formatted_response = f"Response: {response_text}\nSources: {sources}"
         print(formatted_response)
-        return response_text
+        return response_text.content  # Note: OpenAI returns an AIMessage object
         
     except Exception as e:
         print(f"Error in query_rag: {str(e)}")

@@ -74,7 +74,7 @@ async def add_chat_context(request: ChatContextRequest):
 @router.get("/retrieve/{cid}")
 async def retrieve_file(
     cid: str,
-    authorization: str = Header(None)  # Remove decryption_key parameter
+    authorization: str = Header(None) 
 ):
     try:
         # Create data directory if it doesn't exist

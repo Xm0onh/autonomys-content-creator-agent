@@ -1,6 +1,9 @@
-from langchain_ollama import OllamaEmbeddings
-
+from langchain_openai import OpenAIEmbeddings
+from ..core.config import settings
 
 def get_embedding_function():
-    embeddings = OllamaEmbeddings(model="llama3") 
+    embeddings = OpenAIEmbeddings(
+        api_key=settings.OPENAI_API_KEY,
+        model="text-embedding-ada-002"
+    )
     return embeddings

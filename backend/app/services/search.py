@@ -1,9 +1,10 @@
 from langchain_community.utilities import GoogleSearchAPIWrapper
 from langchain.chains import LLMChain
-from langchain_ollama import OllamaLLM
+from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from typing import Optional
 import os
+# from langchain_ollama import OllamaLLM
 
 from ..core.config import settings
 
@@ -23,11 +24,15 @@ Please synthesize this information into a clear and helpful response.
 
 async def google_search(query: str) -> str:
     try:
-        # Perform the Google search
         search_results = search.run(query)
         
-        # Use LLM to process and summarize the results
-        llm = OllamaLLM(model=settings.MODEL_NAME)
+        # Ollama
+        # llm = OllamaLLM(model=settings.MODEL_NAME)
+        llm = ChatOpenAI(
+            model="gpt-4o",
+            api_key=settings.OPENAI_API_KEY,
+            temperature=0.9
+        )
         prompt = PromptTemplate(
             template=SEARCH_PROMPT,
             input_variables=["search_results"]
