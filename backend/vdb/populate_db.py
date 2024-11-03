@@ -16,12 +16,8 @@ CHROMA_PATH = "chroma"
 DATA_PATH = "data"
 
 
-def main():
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--reset", action="store_true", help="Reset the database.")
-    args = parser.parse_args()
-    if args.reset:
+def main(reset=False):
+    if reset:
         print("✨ Clearing Database")
         clear_database()
 

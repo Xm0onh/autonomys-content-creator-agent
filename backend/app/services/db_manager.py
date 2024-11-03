@@ -9,4 +9,4 @@ async def update_database():
     """
     # Run populate_db in a separate thread to avoid blocking
     loop = asyncio.get_event_loop()
-    await loop.run_in_executor(None, populate_db)
+    await loop.run_in_executor(None, lambda: populate_db(reset=False))
