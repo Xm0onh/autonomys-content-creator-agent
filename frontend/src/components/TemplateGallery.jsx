@@ -1,65 +1,79 @@
-import { Box, SimpleGrid, Text, VStack, Icon } from '@chakra-ui/react'
-import { FiFileText, FiMail, FiInstagram, FiLinkedin } from 'react-icons/fi'
+import { Box, VStack, Text, Button, Icon, useToast } from '@chakra-ui/react'
+import { FiDatabase, FiUploadCloud } from 'react-icons/fi'
+import { useState } from 'react'
+import axios from 'axios'
 
-function TemplateCard({ icon, title, description }) {
-  return (
-    <VStack
-      p={3}
-      bg="gray.700"
-      borderRadius="lg"
-      cursor="pointer"
-      transition="all 0.2s"
-      _hover={{ bg: 'gray.600', transform: 'translateY(-2px)' }}
-      spacing={2}
-    >
-      <Icon as={icon} w={5} h={5} color="blue.400" />
-      <Text color="white" fontWeight="bold" fontSize="sm">{title}</Text>
-      <Text color="gray.300" fontSize="xs" textAlign="center">{description}</Text>
-    </VStack>
-  )
-}
+function DatabaseBackup() {
+  const [isUploading, setIsUploading] = useState(false)
+  const toast = useToast()
 
-function TemplateGallery() {
+  const handleBackup = async () => {
+    setIsUploading(true)
+    try {
+      const response = await axios.post('http://localhost:8000/upload-db')
+      
+      toast({
+        title: 'Backup Successful',
+        description: `Database backup uploaded with ID: ${response.data.upload_id}`,
+        status: 'success',
+        duration: 5000,
+        isClosable: true,
+      })
+    } catch (error) {
+      console.error('Backup error:', error)
+      toast({
+        title: 'Backup Failed',
+        description: error.response?.data?.detail || 'Failed to backup database',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
   return (
     <Box 
       h="100%"
       bg="gray.800" 
       borderRadius="xl" 
       boxShadow="dark-lg"
-      overflow="hidden"
-      display="flex"
-      flexDirection="column"
+      p={4}
     >
-      <Text fontSize="xl" fontWeight="bold" color="gray.100" p={4} pb={2}>
-        Templates
-      </Text>
-      
-      <Box p={4} pt={2} flex="1" overflowY="auto">
-        <SimpleGrid columns={2} spacing={3}>
-          <TemplateCard
-            icon={FiFileText}
-            title="Blog Post"
-            description="SEO-optimized blogs"
-          />
-          <TemplateCard
-            icon={FiMail}
-            title="Email"
-            description="Email campaigns"
-          />
-          <TemplateCard
-            icon={FiInstagram}
-            title="Social Post"
-            description="Social media content"
-          />
-          <TemplateCard
-            icon={FiLinkedin}
-            title="Article"
-            description="Professional article writing"
-          />
-        </SimpleGrid>
-      </Box>
+      <VStack spacing={4} align="stretch">
+        <Text fontSize="xl" fontWeight="bold" color="gray.100">
+          Vector Database Backup
+        </Text>
+        
+        <Box
+          p={6}
+          bg="gray.700"
+          borderRadius="lg"
+          borderWidth="1px"
+          borderColor="gray.600"
+        >
+          <VStack spacing={4} align="center">
+            <Icon as={FiDatabase} w={12} h={12} color="blue.400" />
+            <Text color="gray.300" textAlign="center">
+              Backup your Chroma vector database to DSN for safe storage and sharing
+            </Text>
+            <Button
+              leftIcon={<Icon as={FiUploadCloud} />}
+              colorScheme="blue"
+              size="lg"
+              onClick={handleBackup}
+              isLoading={isUploading}
+              loadingText="Uploading..."
+              width="full"
+            >
+              Backup Database
+            </Button>
+          </VStack>
+        </Box>
+      </VStack>
     </Box>
   )
 }
 
-export default TemplateGallery
+export default DatabaseBackup

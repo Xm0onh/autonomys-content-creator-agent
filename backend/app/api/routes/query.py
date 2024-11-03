@@ -11,8 +11,12 @@ from ...services.rag import query_rag
 from ...services.search import google_search, store_search_context
 from ...services.db_manager import update_database
 import mimetypes
+import shutil
+import logging
 
 router = APIRouter()
+
+logger = logging.getLogger(__name__)
 
 class QueryConfig(BaseModel):
     contentType: str
@@ -188,3 +192,150 @@ async def upload_file(file: UploadFile = File(...)):
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/upload-db")
+async def upload_db():
+    try:
+        logger.info(f"Starting database backup process. Chroma path: {settings.CHROMA_PATH}")
+        
+        # Verify Chroma directory exists
+        if not os.path.exists(settings.CHROMA_PATH):
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Chroma directory not found at {settings.CHROMA_PATH}"
+            )
+
+        # Create zip file
+        zip_path = "chroma_backup.zip"
+        try:
+            logger.info("Creating zip archive...")
+            shutil.make_archive(
+                "chroma_backup",  # name of the file without extension
+                'zip',           # archive format
+                settings.CHROMA_PATH  # directory to zip
+            )
+            logger.info(f"Zip archive created successfully at {zip_path}")
+        except Exception as e:
+            logger.error(f"Failed to create zip archive: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to create zip archive: {str(e)}"
+            )
+
+        try:
+            # Verify zip file was created and get its size
+            if not os.path.exists(zip_path):
+                raise HTTPException(
+                    status_code=500,
+                    detail="Zip file was not created successfully"
+                )
+            
+            file_size = os.path.getsize(zip_path)
+            logger.info(f"Zip file size: {file_size} bytes")
+
+            # Upload to DSN
+            async with aiohttp.ClientSession() as session:
+                # Create upload request
+                headers = {
+                    "Authorization": f"Bearer {settings.DSN_API_KEY}",
+                    "X-Auth-Provider": "apikey",
+                    "Content-Type": "application/json"
+                }
+                
+                create_data = {
+                    "filename": "chroma_backup.zip",
+                    "mimeType": "application/zip",
+                    "uploadOptions": None
+                }
+                
+                logger.info("Creating upload request...")
+                base_url = "https://demo.auto-drive.autonomys.xyz"
+                
+                # Create upload
+                async with session.post(
+                    f"{base_url}/uploads/file",
+                    headers=headers,
+                    json=create_data
+                ) as response:
+                    if response.status != 200:
+                        response_text = await response.text()
+                        logger.error(f"Failed to create upload. Status: {response.status}, Response: {response_text}")
+                        raise HTTPException(
+                            status_code=response.status,
+                            detail=f"Failed to create upload: {response_text}"
+                        )
+                    upload_data = await response.json()
+                    upload_id = upload_data["id"]
+                    logger.info(f"Upload created with ID: {upload_id}")
+                
+                # Upload file chunk
+                chunk_headers = {
+                    "Authorization": f"Bearer {settings.DSN_API_KEY}",
+                    "X-Auth-Provider": "apikey"
+                }
+                
+                # Read the entire file into memory
+                with open(zip_path, 'rb') as f:
+                    file_data = f.read()
+                
+                form_data = aiohttp.FormData()
+                form_data.add_field(
+                    "file", 
+                    file_data,
+                    filename="chroma_backup.zip",
+                    content_type="application/zip"
+                )
+                form_data.add_field("index", "0")
+                
+                logger.info("Uploading file chunk...")
+                async with session.post(
+                    f"{base_url}/uploads/file/{upload_id}/chunk",
+                    headers=chunk_headers,
+                    data=form_data
+                ) as response:
+                    if response.status != 200:
+                        response_text = await response.text()
+                        logger.error(f"Failed to upload chunk. Status: {response.status}, Response: {response_text}")
+                        raise HTTPException(
+                            status_code=response.status,
+                            detail=f"Failed to upload chunk: {response_text}"
+                        )
+                    logger.info("File chunk uploaded successfully")
+                
+                # Complete upload
+                logger.info("Completing upload...")
+                async with session.post(
+                    f"{base_url}/uploads/{upload_id}/complete",
+                    headers=headers
+                ) as response:
+                    if response.status != 200:
+                        response_text = await response.text()
+                        logger.error(f"Failed to complete upload. Status: {response.status}, Response: {response_text}")
+                        raise HTTPException(
+                            status_code=response.status,
+                            detail=f"Failed to complete upload: {response_text}"
+                        )
+                    completion_data = await response.json()
+                    logger.info("Upload completed successfully")
+
+        finally:
+            # Clean up zip file
+            try:
+                if os.path.exists(zip_path):
+                    os.remove(zip_path)
+                    logger.info("Cleaned up temporary zip file")
+            except Exception as e:
+                logger.error(f"Failed to clean up zip file: {str(e)}")
+
+        return {
+            "message": "Database backup uploaded successfully",
+            "upload_id": upload_id,
+            "completion": completion_data
+        }
+            
+    except Exception as e:
+        logger.error(f"Unexpected error during database backup: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to backup database: {str(e)}"
+        )

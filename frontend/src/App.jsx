@@ -2,7 +2,7 @@ import { ChakraProvider, Box, Flex, VStack } from '@chakra-ui/react'
 import ChatInterface from './components/ChatInterface'
 import FileUpload from './components/FileUpload'
 import ConfigPanel from './components/ConfigPanel'
-import TemplateGallery from './components/TemplateGallery'
+import DatabaseBackup from './components/TemplateGallery'
 import PreviewPanel from './components/PreviewPanel'
 import { ConfigProvider } from './context/ConfigContext'
 
@@ -18,7 +18,7 @@ function App() {
                 <ConfigPanel />
               </Box>
               <Box flex="1">
-                <TemplateGallery />
+              <DatabaseBackup />
               </Box>
             </VStack>
             
