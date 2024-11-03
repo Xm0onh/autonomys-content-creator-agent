@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 from typing import Optional
 import json
@@ -10,6 +10,7 @@ from ...core.config import settings
 from ...services.rag import query_rag
 from ...services.search import google_search, store_search_context
 from ...services.db_manager import update_database
+import mimetypes
 
 router = APIRouter()
 
@@ -24,6 +25,11 @@ class SearchRequest(BaseModel):
 
 class ChatContextRequest(BaseModel):
     context: str
+
+def get_mime_type(filename):
+    """Detect the MIME type of a file based on its extension"""
+    mime_type, _ = mimetypes.guess_type(filename)
+    return mime_type or 'application/octet-stream'
 
 @router.get("/query")
 async def query_endpoint(query_text: str, config: Optional[str] = None):
@@ -112,5 +118,73 @@ async def retrieve_file(
             "name": filename
         }
         
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    try:
+        # Step 1: Create upload request
+        base_url = "https://demo.auto-drive.autonomys.xyz"
+        headers = {
+            "Authorization": f"Bearer {settings.DSN_API_KEY}",
+            "X-Auth-Provider": "apikey",
+            "Content-Type": "application/json"
+        }
+        
+        create_data = {
+            "filename": file.filename,
+            "mimeType": get_mime_type(file.filename),
+            "uploadOptions": None
+        }
+        
+        async with aiohttp.ClientSession() as session:
+            # Create upload
+            async with session.post(
+                f"{base_url}/uploads/file",
+                headers=headers,
+                json=create_data
+            ) as response:
+                if response.status != 200:
+                    raise HTTPException(status_code=response.status, detail="Failed to create upload")
+                upload_data = await response.json()
+                upload_id = upload_data["id"]
+            
+            # Upload file chunk
+            chunk_headers = {
+                "Authorization": f"Bearer {settings.DSN_API_KEY}",
+                "X-Auth-Provider": "apikey"
+            }
+            
+            form_data = aiohttp.FormData()
+            form_data.add_field("file", 
+                              await file.read(),
+                              filename=file.filename,
+                              content_type=get_mime_type(file.filename))
+            form_data.add_field("index", "0")
+            
+            async with session.post(
+                f"{base_url}/uploads/file/{upload_id}/chunk",
+                headers=chunk_headers,
+                data=form_data
+            ) as response:
+                if response.status != 200:
+                    raise HTTPException(status_code=response.status, detail="Failed to upload chunk")
+            
+            # Complete upload
+            async with session.post(
+                f"{base_url}/uploads/{upload_id}/complete",
+                headers=headers
+            ) as response:
+                if response.status != 200:
+                    raise HTTPException(status_code=response.status, detail="Failed to complete upload")
+                completion_data = await response.json()
+            
+            return JSONResponse(content={
+                "upload_id": upload_id,
+                "status": "success",
+                "completion": completion_data
+            })
+            
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -9,6 +9,7 @@ function FileUpload() {
   const [cid, setCid] = useState('')
   const [retrievedFiles, setRetrievedFiles] = useState([])
   const [isRetrieving, setIsRetrieving] = useState(false)
+  const [uploadIds, setUploadIds] = useState([])
   const toast = useToast()
 
   const handleFileUpload = async (event) => {
@@ -18,28 +19,30 @@ function FileUpload() {
     try {
       const formData = new FormData()
       uploadedFiles.forEach((file) => {
-        formData.append('files', file)
+        formData.append('file', file)
       })
 
-      await axios.post('http://localhost:8000/upload', formData, {
+      const response = await axios.post('http://localhost:8000/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       })
 
       setFiles(prev => [...prev, ...uploadedFiles])
+      setUploadIds(prev => [...prev, response.data.upload_id])
+      
       toast({
         title: 'Upload Successful',
-        description: 'Your files have been uploaded.',
+        description: `File uploaded with ID: ${response.data.upload_id}`,
         status: 'success',
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       })
     } catch (error) {
       console.error('Upload error:', error)
       toast({
         title: 'Upload Failed',
-        description: 'There was an error uploading your files.',
+        description: error.response?.data?.detail || 'There was an error uploading your files.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -160,7 +163,12 @@ function FileUpload() {
             _hover={{ bg: 'gray.750' }}
           >
             <Icon as={FiFile} color="blue.400" />
-            <Text fontSize="sm" color="gray.100" noOfLines={1}>{file.name}</Text>
+            <VStack align="start" spacing={0} flex={1}>
+              <Text fontSize="sm" color="gray.100" noOfLines={1}>{file.name}</Text>
+              {uploadIds[index] && (
+                <Text fontSize="xs" color="gray.400">ID: {uploadIds[index]}</Text>
+              )}
+            </VStack>
           </Box>
         ))}
         {files.length === 0 && (
