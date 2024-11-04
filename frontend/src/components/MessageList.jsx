@@ -19,7 +19,7 @@ function MessageList({ messages }) {
                 : 'rgba(45, 55, 72, 0.6)'}
               backdropFilter="blur(10px)"
               p={4}
-              borderRadius="full"
+              borderRadius="lg"
               boxShadow="0 4px 6px rgba(0, 0, 0, 0.1)"
               position="relative"
               _hover={{
@@ -27,8 +27,17 @@ function MessageList({ messages }) {
                 boxShadow: '0 6px 8px rgba(0, 0, 0, 0.2)',
               }}
               transition="all 0.2s ease"
+              wordBreak="break-word"
+              whiteSpace="pre-wrap"
             >
-              <Text fontSize="md" lineHeight="tall">{message.content}</Text>
+              <Text 
+                fontSize="md" 
+                lineHeight="tall"
+                overflowWrap="break-word"
+                maxW="100%"
+              >
+                {message.content}
+              </Text>
             </Box>
           </Flex>
         </motion.div>
