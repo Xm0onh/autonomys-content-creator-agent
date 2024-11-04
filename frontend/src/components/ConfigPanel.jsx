@@ -15,67 +15,95 @@ function ConfigPanel() {
     <Box
       h="100%"
       w="300px"
-      bg="gray.800"
+      bg="rgba(26, 32, 44, 0.75)"
+      backdropFilter="blur(10px)"
       borderRadius="xl"
-      boxShadow="dark-lg"
+      boxShadow="0 8px 32px 0 rgba(31, 38, 135, 0.37)"
+      border="1px solid rgba(255, 255, 255, 0.18)"
+      transition="all 0.3s ease"
+      _hover={{
+        boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.47)",
+      }}
     >
       <VStack
         h="full"
-        p={5}
-        spacing={4}
+        p={6}
+        spacing={6}
         align="stretch"
       >
-        <Text fontSize="xl" fontWeight="bold" color="gray.100">Configuration</Text>
+        <Text 
+          fontSize="xl" 
+          fontWeight="bold" 
+          bgGradient="linear(to-r, blue.400, purple.500)"
+          bgClip="text"
+        >
+          Configuration
+        </Text>
         
         <FormControl>
-          <FormLabel color="gray.100">Content Type</FormLabel>
+          <FormLabel 
+            color="white"
+            fontSize="sm"
+            textTransform="uppercase"
+            letterSpacing="wide"
+            fontWeight="medium"
+          >
+            Content Type
+          </FormLabel>
           <Select 
-            bg="gray.700" 
-            color="white" 
-            borderColor="gray.600"
+            bg="rgba(45, 55, 72, 0.8)"
+            color="white"
+            border="1px solid rgba(255, 255, 255, 0.2)"
+            _hover={{
+              border: "1px solid rgba(66, 153, 225, 0.5)",
+            }}
             value={config.contentType}
             onChange={(e) => handleChange('contentType', e.target.value)}
           >
-            <option value="blog">Blog Post</option>
-            <option value="social">Social Media</option>
-            <option value="email">Email</option>
-            <option value="article">Article</option>
+            <option style={{background: '#2D3748'}} value="blog">Blog Post</option>
+            <option style={{background: '#2D3748'}} value="social">Social Media</option>
+            <option style={{background: '#2D3748'}} value="email">Email</option>
+            <option style={{background: '#2D3748'}} value="article">Article</option>
           </Select>
         </FormControl>
 
         <FormControl>
-          <FormLabel color="gray.100">Tone</FormLabel>
+          <FormLabel color="white">Tone</FormLabel>
           <Select 
-            bg="gray.700" 
-            color="white" 
-            borderColor="gray.600"
+            bg="rgba(45, 55, 72, 0.8)"
+            color="white"
+            border="1px solid rgba(255, 255, 255, 0.2)"
             value={config.tone}
             onChange={(e) => handleChange('tone', e.target.value)}
           >
-            <option value="professional">Professional</option>
-            <option value="casual">Casual</option>
-            <option value="friendly">Friendly</option>
-            <option value="formal">Formal</option>
+            <option style={{background: '#2D3748'}} value="professional">Professional</option>
+            <option style={{background: '#2D3748'}} value="casual">Casual</option>
+            <option style={{background: '#2D3748'}} value="friendly">Friendly</option>
+            <option style={{background: '#2D3748'}} value="formal">Formal</option>
           </Select>
         </FormControl>
 
         <FormControl>
-          <FormLabel color="gray.100">Creativity Level</FormLabel>
+          <FormLabel color="white">Creativity Level</FormLabel>
           <Slider 
             value={config.creativityLevel}
             onChange={(val) => handleChange('creativityLevel', val)}
-            min={0} 
-            max={100}
           >
-            <SliderTrack bg="gray.600">
-              <SliderFilledTrack bg="blue.500" />
+            <SliderTrack bg="rgba(45, 55, 72, 0.5)">
+              <SliderFilledTrack bgGradient="linear(to-r, blue.400, purple.500)" />
             </SliderTrack>
-            <SliderThumb />
+            <SliderThumb 
+              boxSize={6} 
+              bg="white"
+              _focus={{
+                boxShadow: "0 0 0 3px rgba(66, 153, 225, 0.6)"
+              }}
+            />
           </Slider>
         </FormControl>
 
         <FormControl display="flex" alignItems="center">
-          <FormLabel color="gray.100" mb="0">
+          <FormLabel color="white" mb="0">
             SEO Optimization
           </FormLabel>
           <Switch 

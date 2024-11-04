@@ -1,7 +1,9 @@
-import { VStack, Box, Button, Text, Icon, useToast, Input } from '@chakra-ui/react'
-import { FiUpload, FiFile, FiDownload } from 'react-icons/fi'
+import { VStack, Box, Button, Text, Icon, useToast, Input, Flex, Progress } from '@chakra-ui/react'
+import { FiUpload, FiFile, FiDownload, FiFolder } from 'react-icons/fi'
+import { motion } from 'framer-motion'
 import { useState } from 'react'
 import axios from 'axios'
+
 
 function FileUpload() {
   const [files, setFiles] = useState([])
@@ -93,38 +95,62 @@ function FileUpload() {
     <VStack
       w="300px"
       h="full"
-      bg="gray.800"
+      bg="rgba(26, 32, 44, 0.8)"
+      backdropFilter="blur(10px)"
       p={4}
       spacing={4}
       borderRadius="xl"
-      borderRight="1px"
-      borderColor="gray.700"
-      boxShadow="dark-lg"
+      border="1px solid rgba(255, 255, 255, 0.18)"
+      boxShadow="0 8px 32px 0 rgba(31, 38, 135, 0.37)"
+      transition="all 0.3s ease"
+      _hover={{
+        boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.47)",
+      }}
     >
-      <Text fontSize="xl" fontWeight="bold" color="gray.100">Documents</Text>
+      <Flex align="center" gap={2} w="full">
+        <Icon as={FiFolder} w={6} h={6} color="blue.400" />
+        <Text 
+          fontSize="xl" 
+          fontWeight="bold"
+          bgGradient="linear(to-r, blue.400, purple.500)"
+          bgClip="text"
+        >
+          Documents
+        </Text>
+      </Flex>
       
       {/* Upload Box */}
       <Box
+        as={motion.div}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
         w="full"
         p={4}
-        bg="gray.700"
+        bg="rgba(45, 55, 72, 0.5)"
+        backdropFilter="blur(8px)"
         borderRadius="lg"
-        borderWidth="1px"
-        borderColor="gray.600"
+        border="1px solid rgba(255, 255, 255, 0.1)"
+        transition="all 0.2s"
+        _hover={{
+          border: "1px solid rgba(66, 153, 225, 0.5)",
+        }}
       >
         <VStack w="full" spacing={4}>
-          <Text fontSize="md" color="gray.300">Upload to DSN</Text>
+          <Text fontSize="md" color="white">Upload to DSN</Text>
           <Button
             as="label"
             htmlFor="file-upload"
-            colorScheme="blue"
-            variant="solid"
             leftIcon={<Icon as={FiUpload} />}
             isLoading={isUploading}
             cursor="pointer"
             width="full"
-            bg="blue.600"
-            _hover={{ bg: 'blue.500' }}
+            bgGradient="linear(to-r, blue.400, purple.500)"
+            color="white"
+            _hover={{
+              bgGradient: "linear(to-r, blue.500, purple.600)",
+              transform: "translateY(-2px)",
+            }}
+            transition="all 0.2s"
           >
             Upload Files
             <input
@@ -138,114 +164,193 @@ function FileUpload() {
           </Button>
         </VStack>
       </Box>
-        {/* Files List */}
-        <VStack
-        align="stretch"
+
+      {/* Files List */}
+      <Box
         w="full"
         flex="1"
         overflowY="auto"
-        spacing={2}
-        borderRadius="md"
-        bg="gray.700"
+        bg="rgba(45, 55, 72, 0.3)"
+        borderRadius="lg"
+        border="1px solid rgba(255, 255, 255, 0.1)"
         p={2}
+        css={{
+          '&::-webkit-scrollbar': {
+            width: '4px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '2px',
+          },
+        }}
       >
         {files.map((file, index) => (
-          <Box
+          <motion.div
             key={index}
-            p={2}
-            bg="gray.800"
-            borderRadius="md"
-            border="1px"
-            borderColor="gray.600"
-            display="flex"
-            alignItems="center"
-            gap={2}
-            _hover={{ bg: 'gray.750' }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.1 }}
           >
-            <Icon as={FiFile} color="blue.400" />
-            <VStack align="start" spacing={0} flex={1}>
-              <Text fontSize="sm" color="gray.100" noOfLines={1}>{file.name}</Text>
-              {uploadIds[index] && (
-                <Text fontSize="xs" color="gray.400">ID: {uploadIds[index]}</Text>
-              )}
-            </VStack>
-          </Box>
+            <Box
+              p={3}
+              mb={2}
+              bg="rgba(45, 55, 72, 0.5)"
+              backdropFilter="blur(8px)"
+              borderRadius="lg"
+              border="1px solid rgba(255, 255, 255, 0.1)"
+              display="flex"
+              alignItems="center"
+              gap={3}
+              _hover={{
+                border: "1px solid rgba(66, 153, 225, 0.5)",
+                transform: "translateY(-2px)",
+              }}
+              transition="all 0.2s"
+            >
+              <Icon as={FiFile} color="blue.400" boxSize={5} />
+              <VStack align="start" spacing={0} flex={1}>
+                <Text fontSize="sm" color="white" noOfLines={1}>{file.name}</Text>
+                {uploadIds[index] && (
+                  <Text fontSize="xs" color="gray.400">ID: {uploadIds[index]}</Text>
+                )}
+              </VStack>
+            </Box>
+          </motion.div>
         ))}
         {files.length === 0 && (
-          <Text color="gray.400" fontSize="sm" textAlign="center" py={4}>
-            No files uploaded yet
-          </Text>
+          <Flex 
+            justify="center" 
+            align="center" 
+            h="100px"
+            color="gray.400"
+          >
+            <Text fontSize="sm">No files uploaded yet</Text>
+          </Flex>
         )}
-      </VStack>
+      </Box>
+
       {/* Retrieve Box */}
       <Box
         w="full"
         p={4}
-        bg="gray.700"
+        bg="rgba(45, 55, 72, 0.5)"
+        backdropFilter="blur(8px)"
         borderRadius="lg"
-        borderWidth="1px"
-        borderColor="gray.600"
+        border="1px solid rgba(255, 255, 255, 0.1)"
+        transition="all 0.2s"
+        _hover={{
+          border: "1px solid rgba(66, 153, 225, 0.5)",
+        }}
       >
         <VStack w="full" spacing={3}>
-          <Text fontSize="md" color="gray.300">Retrieve from DSN</Text>
+          <Text fontSize="md" color="white">Retrieve from DSN</Text>
           <Input
             placeholder="Enter CID"
             value={cid}
             onChange={(e) => setCid(e.target.value)}
-            bg="gray.800"
-            color="gray.100"
-            borderColor="gray.600"
+            bg="rgba(45, 55, 72, 0.5)"
+            color="white"
+            border="1px solid rgba(255, 255, 255, 0.1)"
+            _hover={{
+              border: "1px solid rgba(66, 153, 225, 0.5)",
+            }}
+            _focus={{
+              border: "1px solid rgba(66, 153, 225, 0.8)",
+              boxShadow: "0 0 0 1px rgba(66, 153, 225, 0.3)",
+            }}
           />
           <Button
-            colorScheme="green"
             width="full"
             onClick={handleRetrieve}
             leftIcon={<Icon as={FiDownload} />}
             isLoading={isRetrieving}
             loadingText="Retrieving..."
+            bgGradient="linear(to-r, green.400, teal.500)"
+            color="white"
+            _hover={{
+              bgGradient: "linear(to-r, green.500, teal.600)",
+              transform: "translateY(-2px)",
+            }}
+            transition="all 0.2s"
           >
             Retrieve File
           </Button>
         </VStack>
-        
       </Box>
 
       {/* Retrieved Files List */}
       <Box w="full">
-        <Text fontSize="sm" color="gray.300" mb={2}>Retrieved Files</Text>
-        <VStack
-          align="stretch"
+        <Text 
+          fontSize="sm" 
+          color="white" 
+          mb={2}
+          fontWeight="medium"
+        >
+          Retrieved Files
+        </Text>
+        <Box
           w="full"
-          flex="1"
-          overflowY="auto"
-          spacing={2}
-          borderRadius="md"
-          bg="gray.700"
+          bg="rgba(45, 55, 72, 0.3)"
+          borderRadius="lg"
+          border="1px solid rgba(255, 255, 255, 0.1)"
           p={2}
+          maxH="200px"
+          overflowY="auto"
+          css={{
+            '&::-webkit-scrollbar': {
+              width: '4px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: 'transparent',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '2px',
+            },
+          }}
         >
           {retrievedFiles.map((file, index) => (
-            <Box
+            <motion.div
               key={index}
-              p={2}
-              bg="gray.800"
-              borderRadius="md"
-              border="1px"
-              borderColor="gray.600"
-              display="flex"
-              alignItems="center"
-              gap={2}
-              _hover={{ bg: 'gray.750' }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
             >
-              <Icon as={FiFile} color="green.400" />
-              <Text fontSize="sm" color="gray.100" noOfLines={1}>{file.name}</Text>
-            </Box>
+              <Box
+                p={3}
+                mb={2}
+                bg="rgba(45, 55, 72, 0.5)"
+                backdropFilter="blur(8px)"
+                borderRadius="lg"
+                border="1px solid rgba(255, 255, 255, 0.1)"
+                display="flex"
+                alignItems="center"
+                gap={3}
+                _hover={{
+                  border: "1px solid rgba(66, 153, 225, 0.5)",
+                  transform: "translateY(-2px)",
+                }}
+                transition="all 0.2s"
+              >
+                <Icon as={FiFile} color="green.400" boxSize={5} />
+                <Text fontSize="sm" color="white" noOfLines={1}>{file.name}</Text>
+              </Box>
+            </motion.div>
           ))}
           {retrievedFiles.length === 0 && (
-            <Text color="gray.400" fontSize="sm" textAlign="center" py={4}>
-              No files retrieved yet
-            </Text>
+            <Flex 
+              justify="center" 
+              align="center" 
+              h="100px"
+              color="gray.400"
+            >
+              <Text fontSize="sm">No files retrieved yet</Text>
+            </Flex>
           )}
-        </VStack>
+        </Box>
       </Box>
     </VStack>
   )

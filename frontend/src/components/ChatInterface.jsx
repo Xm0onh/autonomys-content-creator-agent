@@ -4,6 +4,7 @@ import { FiSend } from 'react-icons/fi'
 import MessageList from './MessageList'
 import axios from 'axios'
 import { useConfig } from '../context/ConfigContext'
+import { motion } from 'framer-motion'
 
 function ChatInterface() {
   const messagesEndRef = useRef(null)
@@ -75,19 +76,23 @@ function ChatInterface() {
     <VStack 
       spacing={0} 
       align="stretch" 
-      h="100%"  // Changed from "full" to "100%"
-      bg="gray.800"
-      boxShadow="2xl"
+      h="100%"
+      bg="rgba(26, 32, 44, 0.8)"
+      backdropFilter="blur(10px)"
+      boxShadow="0 8px 32px 0 rgba(31, 38, 135, 0.37)"
       borderRadius="2xl"
-      border="1px solid"
-      borderColor="gray.700"
+      border="1px solid rgba(255, 255, 255, 0.18)"
       position="relative"
       overflow="hidden"
+      transition="all 0.3s ease"
+      _hover={{
+        boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.47)",
+      }}
     >
       <Box 
         flex="1" 
-        overflowY="auto"  // Added this
-        position="relative"  // Added this
+        overflowY="auto"
+        position="relative"
         p={5}
         bg="gray.800"
         css={{
@@ -113,20 +118,20 @@ function ChatInterface() {
         }}
       >
         <Box 
-          position="absolute"  // Added this
-          inset={0}  // Added this
-          p={5}  // Added this
-          overflowY="auto"  // Added this
+          position="absolute"
+          inset={0}
+          p={5}
+          overflowY="auto"
           sx={{
-            '& > *': {  // Apply styles to direct children
+            '& > *': {
               maxWidth: '100%',
-              wordBreak: 'break-word',  // Break long words
-              overflowWrap: 'break-word',  // Wrap long words
-              whiteSpace: 'pre-wrap'  // Preserve whitespace and wrap text
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
+              whiteSpace: 'pre-wrap'
             },
             '& pre': {
               maxWidth: '100%',
-              overflowX: 'hidden',  // Ensure no horizontal scroll for code blocks
+              overflowX: 'hidden',
               overflowY: 'hidden'
             }
           }}
@@ -139,13 +144,10 @@ function ChatInterface() {
       <Box 
         as="form" 
         onSubmit={handleSubmit} 
-        p={3}
-        w="full"
-        maxW="100%"
-        bg="gray.900"
-        borderTop="1px solid"
-        borderColor="gray.700"
-        backdropFilter="blur(8px)"
+        p={4}
+        bg="rgba(23, 25, 35, 0.9)"
+        backdropFilter="blur(10px)"
+        borderTop="1px solid rgba(255, 255, 255, 0.1)"
       >
         <Flex 
           gap={2} 
@@ -158,7 +160,7 @@ function ChatInterface() {
             placeholder="Type your message..."
             size="md"
             flex="1"
-            minW={0}  // Important for flex items
+            minW={0}
             bg="gray.800"
             border="1px solid"
             borderColor="gray.600"

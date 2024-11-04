@@ -1,4 +1,5 @@
 import { ChakraProvider, Box, Flex, VStack, Text } from '@chakra-ui/react'
+import theme from './theme'
 import ChatInterface from './components/ChatInterface'
 import FileUpload from './components/FileUpload'
 import ConfigPanel from './components/ConfigPanel'
@@ -8,7 +9,7 @@ import { ConfigProvider } from './context/ConfigContext'
 
 function App() {
   return (
-    <ChakraProvider>
+    <ChakraProvider theme={theme}>
       <ConfigProvider>
         <Box minH="100vh" bg="gray.900" p={4}>
           {/* Brand Header */}
@@ -52,11 +53,11 @@ function App() {
           <Flex maxW="1800px" mx="auto" h="calc(100vh - 8rem)" gap={4}>
             {/* Left Column */}
             <VStack spacing={4} w="300px" h="full">
-              <Box flex="1">
+              <Box h="60%" w="full">
                 <ConfigPanel />
               </Box>
-              <Box flex="1">
-              <DatabaseBackup />
+              <Box h="40%" w="full">
+                <DatabaseBackup />
               </Box>
             </VStack>
             
