@@ -19,7 +19,7 @@ function MessageList({ messages }) {
                 : 'rgba(45, 55, 72, 0.6)'}
               backdropFilter="blur(10px)"
               p={4}
-              borderRadius={message.role === 'user' ? '2xl 2xl 0 2xl' : '2xl 2xl 2xl 0'}
+              borderRadius="full"
               boxShadow="0 4px 6px rgba(0, 0, 0, 0.1)"
               position="relative"
               _hover={{
