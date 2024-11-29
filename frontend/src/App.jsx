@@ -1,4 +1,5 @@
-import { ChakraProvider, Box, Flex, VStack, Text } from '@chakra-ui/react'
+import { ChakraProvider, Box, Flex, VStack, Text, Button, Icon, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, useDisclosure } from '@chakra-ui/react'
+import { FiShield } from 'react-icons/fi';
 import theme from './theme'
 import ChatInterface from './components/ChatInterface'
 import FileUpload from './components/FileUpload'
@@ -8,11 +9,12 @@ import PreviewPanel from './components/PreviewPanel'
 import { ConfigProvider } from './context/ConfigContext'
 
 function App() {
+  const { isOpen, onOpen, onClose } = useDisclosure()
+
   return (
     <ChakraProvider theme={theme}>
       <ConfigProvider>
         <Box minH="100vh" bg="gray.900" p={4}>
-          {/* Brand Header */}
           <Flex 
             maxW="1800px" 
             mx="auto" 
@@ -21,10 +23,9 @@ function App() {
             justify="space-between"
           >
             <Flex align="center" gap={3}>
-              {/* You can replace this with your actual logo */}
               <Box
                 as="img"
-                src="/assets/Autonomys_RGB_Mark_White.svg" // Add your logo file
+                src="/assets/Autonomys_RGB_Mark_White.svg"
                 h="40px"
                 alt="Autonomys Network"
               />
@@ -39,7 +40,6 @@ function App() {
               </Text>
             </Flex>
             
-            {/* Optional: Add a tagline or additional branding */}
             <Text 
               color="gray.400" 
               fontSize="md"
@@ -47,6 +47,34 @@ function App() {
             >
               Autonomys Network - The Foundation Layer for AI3.0
             </Text>
+
+            <Button
+                onClick={onOpen}
+                colorScheme="green"
+                size="md"
+                leftIcon={<Icon as={FiShield} />}
+                bgGradient="linear(to-r, green.400, teal.500)"
+                color="white"
+                _hover={{
+                  bgGradient: "linear(to-r, green.500, teal.600)",
+                  transform: "translateY(-2px)",
+                }}
+                transition="all 0.2s"
+              >
+              Attestation
+            </Button>
+
+            <Modal isOpen={isOpen} onClose={onClose}>
+              <ModalOverlay />
+              <ModalContent bg="gray.800" color="white">
+                <ModalHeader>Attestation</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody pb={6}>
+                  <Text>Your attestation content goes here...</Text>
+                </ModalBody>
+              </ModalContent>
+            </Modal>
+
           </Flex>
 
           {/* Existing layout */}
@@ -72,6 +100,7 @@ function App() {
             {/* Right Column */}
             <PreviewPanel />
           </Flex>
+          
         </Box>
       </ConfigProvider>
     </ChakraProvider>

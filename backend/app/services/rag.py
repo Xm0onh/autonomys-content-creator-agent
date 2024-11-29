@@ -79,7 +79,7 @@ def query_rag(query_text: str, config: dict = None) -> str:
 
         # OpenAI
         model = ChatOpenAI(
-            model="gpt-3.5-turbo",  # or "gpt-4" if you prefer
+            model="gpt-3.5-turbo",
             api_key=settings.OPENAI_API_KEY,
             temperature=0.7
         )
@@ -88,7 +88,7 @@ def query_rag(query_text: str, config: dict = None) -> str:
         sources = [doc.metadata.get("id", None) for doc, _score in results]
         formatted_response = f"Response: {response_text}\nSources: {sources}"
         print(formatted_response)
-        return response_text.content  # Note: OpenAI returns an AIMessage object
+        return response_text.content 
         
     except Exception as e:
         print(f"Error in query_rag: {str(e)}")
