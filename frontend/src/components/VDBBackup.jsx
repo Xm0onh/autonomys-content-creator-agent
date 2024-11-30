@@ -11,7 +11,7 @@ function DatabaseBackup() {
   const handleBackup = async () => {
     setIsUploading(true)
     try {
-      const response = await axios.post('http://localhost:8000/upload-db')
+      const response = await axios.post('http://20.49.47.204:8010/upload-db')
       
       toast({
         title: 'Backup Successful',

@@ -40,7 +40,7 @@ function ChatInterface() {
     setIsLoading(true)
 
     try {
-      const response = await axios.post('http://localhost:8000/query', {
+      const response = await axios.post('http://20.49.47.204:8010/query', {
         query_text: input,
         config: config
       })

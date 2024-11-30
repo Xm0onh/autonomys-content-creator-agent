@@ -24,7 +24,7 @@ function FileUpload() {
         formData.append('file', file)
       })
 
-      const response = await axios.post('http://localhost:8000/upload', formData, {
+      const response = await axios.post('http://20.49.47.204:8010/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -68,7 +68,7 @@ function FileUpload() {
 
     setIsRetrieving(true)
     try {
-      const response = await axios.get(`http://localhost:8000/retrieve/${cid}`)
+      const response = await axios.get(`http://20.49.47.204:8010/retrieve/${cid}`)
       setRetrievedFiles(prev => [...prev, { name: response.data.name }])
       toast({
         title: 'Retrieval Successful',
