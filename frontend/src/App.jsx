@@ -4,7 +4,7 @@ import theme from './theme'
 import ChatInterface from './components/ChatInterface'
 import FileUpload from './components/FileUpload'
 import ConfigPanel from './components/ConfigPanel'
-import DatabaseBackup from './components/TemplateGallery'
+import DatabaseBackup from './components/VDBBackup'
 import PreviewPanel from './components/SearchPanel'
 import { ConfigProvider } from './context/ConfigContext'
 import { useState, useEffect } from 'react'
@@ -77,7 +77,7 @@ function App() {
                 bgClip="text"
                 letterSpacing="tight"
               >
-                AI3.0 Content Generator Agent
+                AI3.0 Confidential RAG Agent
               </Text>
             </Flex>
             

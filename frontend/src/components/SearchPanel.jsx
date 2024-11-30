@@ -13,7 +13,7 @@ function PreviewPanel() {
     if (!query.trim()) return
     setIsLoading(true)
     try {
-      const response = await fetch('http://localhost:8000/search', {
+      const response = await fetch('http://20.49.47.204:8010/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query })
@@ -41,7 +41,7 @@ function PreviewPanel() {
   const sendToChat = async () => {
     if (!searchResult) return
     try {
-      const response = await fetch('http://localhost:8000/chat/context', {
+      const response = await fetch('http://20.49.47.204:8010/chat/context', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ context: searchResult })

@@ -169,6 +169,7 @@ function FileUpload() {
       <Box
         w="full"
         flex="1"
+        maxH="400px"
         overflowY="auto"
         bg="rgba(45, 55, 72, 0.3)"
         borderRadius="lg"
@@ -224,7 +225,7 @@ function FileUpload() {
           <Flex 
             justify="center" 
             align="center" 
-            h="100px"
+            h="80px"
             color="gray.400"
           >
             <Text fontSize="sm">No files uploaded yet</Text>
@@ -282,7 +283,7 @@ function FileUpload() {
       </Box>
 
       {/* Retrieved Files List */}
-      <Box w="full">
+      <Box w="full" flex="1" display="flex" flexDirection="column">
         <Text 
           fontSize="sm" 
           color="white" 
@@ -293,11 +294,12 @@ function FileUpload() {
         </Text>
         <Box
           w="full"
+          flex="1"
           bg="rgba(45, 55, 72, 0.3)"
           borderRadius="lg"
           border="1px solid rgba(255, 255, 255, 0.1)"
           p={2}
-          maxH="200px"
+          maxH="400px"
           overflowY="auto"
           css={{
             '&::-webkit-scrollbar': {
@@ -344,7 +346,7 @@ function FileUpload() {
             <Flex 
               justify="center" 
               align="center" 
-              h="100px"
+              h="80px"
               color="gray.400"
             >
               <Text fontSize="sm">No files retrieved yet</Text>
