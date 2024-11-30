@@ -4,11 +4,9 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from typing import Optional
 import os
-# from langchain_ollama import OllamaLLM
 
 from ..core.config import settings
 
-# Verify that API keys exist before creating the wrapper
 if not settings.GOOGLE_API_KEY or not settings.GOOGLE_CSE_ID:
     raise ValueError(
         "Missing Google API credentials. Please ensure GOOGLE_API_KEY and GOOGLE_CSE_ID "

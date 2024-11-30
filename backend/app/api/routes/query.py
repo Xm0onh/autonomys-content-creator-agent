@@ -127,10 +127,8 @@ async def retrieve_file(
         ):
             raise HTTPException(status_code=500, detail="Failed to decrypt file")
 
-        ## we have to remove the encrypted file after it's decrypted
         os.remove(encrypted_file_path)
         
-        # Update the database
         await update_database()
         
         return {

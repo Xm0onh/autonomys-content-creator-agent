@@ -1,4 +1,4 @@
-import { ChakraProvider, Box, Flex, VStack, Text, Button, Icon, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, useDisclosure } from '@chakra-ui/react'
+import { ChakraProvider, Box, Flex, VStack, Text, Button, Icon, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, useDisclosure, Spinner } from '@chakra-ui/react'
 import { FiShield } from 'react-icons/fi';
 import theme from './theme'
 import ChatInterface from './components/ChatInterface'
@@ -7,9 +7,60 @@ import ConfigPanel from './components/ConfigPanel'
 import DatabaseBackup from './components/TemplateGallery'
 import PreviewPanel from './components/PreviewPanel'
 import { ConfigProvider } from './context/ConfigContext'
+import { useState, useEffect } from 'react'
 
 function App() {
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const [attestationData, setAttestationData] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const fetchAttestation = async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch('/attestation', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json()
+      if (data.output) {
+        setAttestationData(data.output)
+      } else {
+        setAttestationData('No attestation data received in response')
+      }
+    } catch (error) {
+      console.error('Error fetching attestation:', error)
+      setAttestationData(`Error fetching attestation data: ${error.message}
+      
+This might be due to:
+- CORS policy restrictions (most likely)
+- Server being unavailable
+- Network connectivity issues
+
+Troubleshooting steps:
+1. Ensure the server at http://20.49.47.204:8001 is running
+2. Check if the server has CORS enabled
+3. Verify the server accepts requests from ${window.location.origin}
+
+Technical details:
+${error.toString()}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchAttestation()
+    }
+  }, [isOpen])
 
   return (
     <ChakraProvider theme={theme}>
@@ -64,13 +115,31 @@ function App() {
               Attestation
             </Button>
 
-            <Modal isOpen={isOpen} onClose={onClose}>
+            <Modal isOpen={isOpen} onClose={onClose} size="xl">
               <ModalOverlay />
-              <ModalContent bg="gray.800" color="white">
+              <ModalContent bg="gray.800" color="white" maxH="80vh">
                 <ModalHeader>Attestation</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody pb={6}>
-                  <Text>Your attestation content goes here...</Text>
+                  <Box 
+                    overflowY="auto" 
+                    maxH="60vh"
+                    whiteSpace="pre-wrap"
+                    fontFamily="monospace"
+                    fontSize="sm"
+                    bg="gray.900"
+                    p={4}
+                    borderRadius="md"
+                    position="relative"
+                  >
+                    {isLoading ? (
+                      <Flex justify="center" align="center" minH="200px">
+                        <Spinner size="xl" color="blue.400" />
+                      </Flex>
+                    ) : (
+                      attestationData
+                    )}
+                  </Box>
                 </ModalBody>
               </ModalContent>
             </Modal>
