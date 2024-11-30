@@ -33,7 +33,6 @@ function ChatInterface() {
     const userMessage = { role: 'user', content: input }
     setMessages(prev => [...prev, userMessage])
     
-    // Add thinking message
     const thinkingMessage = { role: 'assistant', content: '🤔 Thinking...' }
     setMessages(prev => [...prev, thinkingMessage])
     
@@ -41,15 +40,11 @@ function ChatInterface() {
     setIsLoading(true)
 
     try {
-      console.log(config)
-      const response = await axios.get('http://localhost:8000/query', {
-        params: {
-          query_text: input,
-          config: JSON.stringify(config)  // Send configuration with the request
-        }
+      const response = await axios.post('http://localhost:8000/query', {
+        query_text: input,
+        config: config
       })
       
-      // Remove thinking message and add real response
       setMessages(prev => {
         const filteredMessages = prev.filter(msg => msg !== thinkingMessage)
         return [...filteredMessages, { 
@@ -59,7 +54,6 @@ function ChatInterface() {
       })
     } catch (error) {
       console.error('Error:', error)
-      // Remove thinking message and add error message
       setMessages(prev => {
         const filteredMessages = prev.filter(msg => msg !== thinkingMessage)
         return [...filteredMessages, {

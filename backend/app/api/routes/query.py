@@ -15,6 +15,7 @@ import shutil
 import logging
 from ...utils.encryption import encrypt_file_for_tee
 from ...utils.tee_decryption import decrypt_tee_file
+from typing import Dict, Any
 
 router = APIRouter()
 
@@ -32,26 +33,31 @@ class SearchRequest(BaseModel):
 class ChatContextRequest(BaseModel):
     context: str
 
+class QueryRequest(BaseModel):
+    query_text: str
+    config: Dict[str, Any]
+
 def get_mime_type(filename):
     """Detect the MIME type of a file based on its extension"""
     mime_type, _ = mimetypes.guess_type(filename)
     return mime_type or 'application/octet-stream'
 
 @router.get("/query")
-async def query_endpoint(query_text: str, config: Optional[str] = None):
-    if not query_text.strip():
-        raise HTTPException(status_code=400, detail="Query text cannot be empty")
-    
+async def query_endpoint_get(query_text: str, config: Optional[str] = None):
     try:
-        # Parse the config JSON string
         config_dict = json.loads(config) if config else {}
-        
-        # Generate the response using the enhanced prompt
-        response = query_rag(query_text, config_dict)
-        return JSONResponse(content={"response": response})
-        
+        response = await query_rag(query_text, config_dict)
+        return {"response": response}
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid configuration format")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/query")
+async def query_endpoint_post(request: QueryRequest):
+    try:
+        response = await query_rag(request.query_text, request.config)
+        return {"response": response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -115,7 +121,7 @@ async def retrieve_file(
                 # Save encrypted file
                 with open(encrypted_file_path, "wb") as f:
                     f.write(await response.read())
-
+        
         # Decrypt the file
         decrypted_filename = filename.replace('.msgpack', '')
         decrypted_file_path = os.path.join(settings.DATA_PATH, decrypted_filename)

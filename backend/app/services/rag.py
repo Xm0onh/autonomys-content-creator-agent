@@ -73,20 +73,25 @@ async def query_rag(query_text: str, config: dict = None) -> str:
         prompt = prompt_template.format(context=context_text, question=query_text)
 
         async with aiohttp.ClientSession() as session:
-            async with session.post(
-                f"{settings.VM_ENDPOINT}/generate",
-                headers={"Content-Type": "application/json"},
-                json={
-                    "prompt": prompt,
-                    "model": "llama3.2-vision",
-                    "max_tokens": 200
-                }
-            ) as response:
-                if response.status != 200:
-                    raise Exception(f"TEE endpoint returned status {response.status}")
-                
-                response_data = await response.json()
-                response_text = response_data.get("response", "") 
+            try:
+                async with session.post(
+                    f"{settings.VM_ENDPOINT}/generate",
+                    headers={"Content-Type": "application/json"},
+                    json={
+                        "prompt": prompt,
+                        "model": "llama3.2-vision",
+                        "max_tokens": 200
+                    },
+                    timeout=30  # Add timeout
+                ) as response:
+                    if response.status != 200:
+                        error_text = await response.text()
+                        raise Exception(f"TEE endpoint returned status {response.status}: {error_text}")
+                    
+                    response_data = await response.json()
+                    response_text = response_data.get("response", "")
+            except aiohttp.ClientError as e:
+                raise Exception(f"Network error while calling TEE endpoint: {str(e)}")
 
         sources = [doc.metadata.get("id", None) for doc, _score in results]
         formatted_response = f"Response: {response_text}\nSources: {sources}"
@@ -95,4 +100,4 @@ async def query_rag(query_text: str, config: dict = None) -> str:
         
     except Exception as e:
         print(f"Error in query_rag: {str(e)}")
-        return "I apologize, but I encountered an error while processing your request."
+        raise  # Re-raise the exception instead of returning an error message

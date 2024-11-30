@@ -5,7 +5,7 @@ import ChatInterface from './components/ChatInterface'
 import FileUpload from './components/FileUpload'
 import ConfigPanel from './components/ConfigPanel'
 import DatabaseBackup from './components/TemplateGallery'
-import PreviewPanel from './components/PreviewPanel'
+import PreviewPanel from './components/SearchPanel'
 import { ConfigProvider } from './context/ConfigContext'
 import { useState, useEffect } from 'react'
 
@@ -39,22 +39,12 @@ function App() {
       console.error('Error fetching attestation:', error)
       setAttestationData(`Error fetching attestation data: ${error.message}
       
-This might be due to:
-- CORS policy restrictions (most likely)
-- Server being unavailable
-- Network connectivity issues
-
-Troubleshooting steps:
-1. Ensure the server at http://20.49.47.204:8001 is running
-2. Check if the server has CORS enabled
-3. Verify the server accepts requests from ${window.location.origin}
-
-Technical details:
-${error.toString()}`)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    Technical details:
+    ${error.toString()}`)
+        } finally {
+          setIsLoading(false)
+        }
+      }
 
   useEffect(() => {
     if (isOpen) {

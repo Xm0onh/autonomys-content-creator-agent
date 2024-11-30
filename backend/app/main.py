@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from .api.deps import setup_middlewares
 from .api.routes.query import router
@@ -14,6 +15,15 @@ def create_app() -> FastAPI:
     
     setup_middlewares(app)
     app.include_router(router)
+    
+    # Configure CORS
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],  # Add your frontend URL
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     
     return app
 

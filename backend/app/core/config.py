@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     GOOGLE_CSE_ID: str = ""
     DSN_API_KEY: str = ""
     OPENAI_API_KEY: str = ""
-    VM_ENDPOINT: str = "http://your-vm-ip:port"
+    VM_ENDPOINT: str = "http://20.49.47.204:8000"
     PRIVATE_KEY_PATH: str = "private_key.pem"
 
     class Config:
