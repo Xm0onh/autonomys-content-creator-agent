@@ -72,7 +72,7 @@ function FileUpload() {
       setRetrievedFiles(prev => [...prev, { name: response.data.name }])
       toast({
         title: 'Retrieval Successful',
-        description: 'File retrieved and added to the database.',
+        description: 'File retrieved and decrypted securely on TEE and added to the vector database.',
         status: 'success',
         duration: 3000,
         isClosable: true,
