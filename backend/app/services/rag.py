@@ -1,7 +1,6 @@
 from langchain_chroma import Chroma
 from langchain.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
-# from langchain_ollama import OllamaLLM
+import aiohttp
 
 from ..core.config import settings
 from ..utils.embedding import get_embedding_function
@@ -54,7 +53,7 @@ def generate_system_prompt(config: dict) -> str:
     
     return prompt
 
-def query_rag(query_text: str, config: dict = None) -> str:
+async def query_rag(query_text: str, config: dict = None) -> str:
     """
     Process the query using RAG with configuration settings.
     """
@@ -73,22 +72,26 @@ def query_rag(query_text: str, config: dict = None) -> str:
         prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
         prompt = prompt_template.format(context=context_text, question=query_text)
 
-
-        # Ollama
-        # llm = OllamaLLM(model=settings.MODEL_NAME)
-
-        # OpenAI
-        model = ChatOpenAI(
-            model="gpt-3.5-turbo",
-            api_key=settings.OPENAI_API_KEY,
-            temperature=0.7
-        )
-        response_text = model.invoke(prompt)
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{settings.VM_ENDPOINT}/generate",
+                headers={"Content-Type": "application/json"},
+                json={
+                    "prompt": prompt,
+                    "model": "llama3.2-vision",
+                    "max_tokens": 200
+                }
+            ) as response:
+                if response.status != 200:
+                    raise Exception(f"TEE endpoint returned status {response.status}")
+                
+                response_data = await response.json()
+                response_text = response_data.get("response", "") 
 
         sources = [doc.metadata.get("id", None) for doc, _score in results]
         formatted_response = f"Response: {response_text}\nSources: {sources}"
         print(formatted_response)
-        return response_text.content 
+        return response_text
         
     except Exception as e:
         print(f"Error in query_rag: {str(e)}")

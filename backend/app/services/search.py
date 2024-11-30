@@ -1,4 +1,4 @@
-from langchain_community.utilities import GoogleSearchAPIWrapper
+from langchain_google_community import GoogleSearchAPIWrapper
 from langchain.chains import LLMChain
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
@@ -7,6 +7,13 @@ import os
 # from langchain_ollama import OllamaLLM
 
 from ..core.config import settings
+
+# Verify that API keys exist before creating the wrapper
+if not settings.GOOGLE_API_KEY or not settings.GOOGLE_CSE_ID:
+    raise ValueError(
+        "Missing Google API credentials. Please ensure GOOGLE_API_KEY and GOOGLE_CSE_ID "
+        "are set in your .env file"
+    )
 
 search = GoogleSearchAPIWrapper(
     google_api_key=settings.GOOGLE_API_KEY,

@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     GOOGLE_CSE_ID: str = ""
     DSN_API_KEY: str = ""
     OPENAI_API_KEY: str = ""
+    VM_ENDPOINT: str = "http://your-vm-ip:port"
 
     class Config:
         env_file = ".env"

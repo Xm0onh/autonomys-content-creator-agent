@@ -13,6 +13,7 @@ from ...services.db_manager import update_database
 import mimetypes
 import shutil
 import logging
+from ...utils.encryption import encrypt_file_for_tee
 
 router = APIRouter()
 
@@ -128,7 +129,16 @@ async def retrieve_file(
 @router.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     try:
-        # Step 1: Create upload request
+        # Read file data
+        file_data = await file.read()
+        
+        # Encrypt file data for TEE
+        encrypted_bundle = encrypt_file_for_tee(
+            file_data, 
+            "public_key.pem"  # Assuming the key is in the root directory
+        )
+        
+        # Create upload request
         base_url = "https://demo.auto-drive.autonomys.xyz"
         headers = {
             "Authorization": f"Bearer {settings.DSN_API_KEY}",
@@ -137,8 +147,8 @@ async def upload_file(file: UploadFile = File(...)):
         }
         
         create_data = {
-            "filename": file.filename,
-            "mimeType": get_mime_type(file.filename),
+            "filename": f"{file.filename}.msgpack",
+            "mimeType": "application/octet-stream",
             "uploadOptions": None
         }
         
@@ -154,17 +164,19 @@ async def upload_file(file: UploadFile = File(...)):
                 upload_data = await response.json()
                 upload_id = upload_data["id"]
             
-            # Upload file chunk
+            # Upload encrypted bundle
             chunk_headers = {
                 "Authorization": f"Bearer {settings.DSN_API_KEY}",
                 "X-Auth-Provider": "apikey"
             }
             
             form_data = aiohttp.FormData()
-            form_data.add_field("file", 
-                              await file.read(),
-                              filename=file.filename,
-                              content_type=get_mime_type(file.filename))
+            form_data.add_field(
+                "file", 
+                encrypted_bundle,
+                filename=f"{file.filename}.msgpack",
+                content_type="application/octet-stream"
+            )
             form_data.add_field("index", "0")
             
             async with session.post(
@@ -184,8 +196,11 @@ async def upload_file(file: UploadFile = File(...)):
                     raise HTTPException(status_code=response.status, detail="Failed to complete upload")
                 completion_data = await response.json()
             
+            # print the response
+            print(completion_data)
+
             return JSONResponse(content={
-                "upload_id": upload_id,
+                "upload_id": completion_data["cid"],
                 "status": "success",
                 "completion": completion_data
             })
