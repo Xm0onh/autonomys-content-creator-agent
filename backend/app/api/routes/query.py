@@ -14,6 +14,7 @@ import mimetypes
 import shutil
 import logging
 from ...utils.encryption import encrypt_file_for_tee
+from ...utils.tee_decryption import decrypt_tee_file
 
 router = APIRouter()
 
@@ -108,19 +109,33 @@ async def retrieve_file(
                 
                 # Get filename from headers or use CID as filename
                 content_disposition = response.headers.get("Content-Disposition", "")
-                filename = content_disposition.split("filename=")[-1].strip('"') or f"{cid}.pdf"
-                file_path = os.path.join(settings.DATA_PATH, filename)
+                filename = content_disposition.split("filename=")[-1].strip('"') or f"{cid}.msgpack"
+                encrypted_file_path = os.path.join(settings.DATA_PATH, filename)
                 
-                # Save file
-                with open(file_path, "wb") as f:
+                # Save encrypted file
+                with open(encrypted_file_path, "wb") as f:
                     f.write(await response.read())
 
+        # Decrypt the file
+        decrypted_filename = filename.replace('.msgpack', '')
+        decrypted_file_path = os.path.join(settings.DATA_PATH, decrypted_filename)
+        
+        if not decrypt_tee_file(
+            encrypted_file_path=encrypted_file_path,
+            private_key_path=settings.PRIVATE_KEY_PATH,
+            output_file_path=decrypted_file_path
+        ):
+            raise HTTPException(status_code=500, detail="Failed to decrypt file")
+
+        ## we have to remove the encrypted file after it's decrypted
+        os.remove(encrypted_file_path)
+        
         # Update the database
         await update_database()
         
         return {
-            "message": "File retrieved and database updated successfully",
-            "name": filename
+            "message": "File retrieved, decrypted, and database updated successfully",
+            "name": decrypted_filename
         }
         
     except Exception as e:

@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     DSN_API_KEY: str = ""
     OPENAI_API_KEY: str = ""
     VM_ENDPOINT: str = "http://your-vm-ip:port"
+    PRIVATE_KEY_PATH: str = "private_key.pem"
 
     class Config:
         env_file = ".env"
