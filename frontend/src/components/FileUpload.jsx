@@ -136,7 +136,7 @@ function FileUpload() {
         }}
       >
         <VStack w="full" spacing={4}>
-          <Text fontSize="md" color="white">Upload to DSN</Text>
+          <Text fontSize="md" color="white">Upload Encrypted File to DSN</Text>
           <Button
             as="label"
             htmlFor="file-upload"
@@ -210,11 +210,11 @@ function FileUpload() {
               }}
               transition="all 0.2s"
             >
-              <Icon as={FiFile} color="blue.400" boxSize={5} />
-              <VStack align="start" spacing={0} flex={1}>
-                <Text fontSize="sm" color="white" noOfLines={1}>{file.name}</Text>
+              <Icon as={FiFile} color="blue.400" boxSize={5} flexShrink={0} />
+              <VStack align="start" spacing={0} flex={1} minW={0}>
+                <Text fontSize="sm" color="white" noOfLines={1} w="full">{file.name}</Text>
                 {uploadIds[index] && (
-                  <Text fontSize="xs" color="gray.400">ID: {uploadIds[index]}</Text>
+                  <Text fontSize="xs" color="gray.400" w="full" whiteSpace="normal">{`ID: ${uploadIds[index]}`}</Text>
                 )}
               </VStack>
             </Box>
@@ -246,7 +246,7 @@ function FileUpload() {
         }}
       >
         <VStack w="full" spacing={3}>
-          <Text fontSize="md" color="white">Retrieve from DSN</Text>
+          <Text fontSize="md" color="white">Retrieve from DSN on TEE</Text>
           <Input
             placeholder="Enter CID"
             value={cid}
